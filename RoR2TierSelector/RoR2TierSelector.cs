@@ -1,4 +1,7 @@
 ﻿using BepInEx;
+using BepInEx.Logging;
+using RoR2;
+using UnityEngine;
 
 namespace RoR2TierSelector
 {
@@ -15,9 +18,24 @@ namespace RoR2TierSelector
 		public const string PluginAuthor = "Redtrain22";
 		public const string PluginVersion = "0.0.1";
 
+		// Use for checking game version.
+		private const string GameBuildId = "1.2.4.1";
+		private static ConfigManager config = new ConfigManager();
+
 		public void Awake()
 		{
-			Logger.Log(BepInEx.Logging.LogLevel.Info, "Plugin Loaded");
+			Logger.Log(LogLevel.Info, $"Loaded {PluginName} v{PluginVersion}");
+		}
+
+		private void checkGameVersion(On.RoR2.RoR2Application.orig_Awake orig, RoR2Application self)
+		{
+			var buildId = Application.version;
+			if (GameBuildId == buildId) return;
+
+			Logger.LogWarning($"This version of \"{PluginName}\" was built for build id \"{GameBuildId}\", you are running \"{buildId}\".");
+			Logger.LogWarning("Should any problems arise, please check for a new version before reporting issues.");
+
+			orig(self);
 		}
 	}
 }
