@@ -26,6 +26,8 @@ namespace RoR2TierSelector
 		{
 			Logger.Log(LogLevel.Info, $"Loaded {PluginName} v{PluginVersion}");
 			config = new ConfigManager();
+
+			// config.AddItemToList();
 		}
 
 		private void checkGameVersion(On.RoR2.RoR2Application.orig_Awake orig, RoR2Application self)
@@ -38,5 +40,7 @@ namespace RoR2TierSelector
 
 			orig(self);
 		}
+
+		// private void Test()
 	}
 }
