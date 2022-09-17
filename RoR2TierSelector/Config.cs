@@ -36,7 +36,7 @@ namespace RoR2TierSelector
 			).Value;
 		}
 
-		public void reloadConfig()
+		public void ReloadConfig()
 		{
 			mainConfig.Reload();
 		}
