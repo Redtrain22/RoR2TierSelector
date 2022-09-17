@@ -1,7 +1,6 @@
 using BepInEx;
 using BepInEx.Configuration;
 using System.IO;
-using System;
 
 namespace RoR2TierSelector
 {
@@ -15,7 +14,6 @@ namespace RoR2TierSelector
 		public struct Internals
 		{
 			public static int configVersion { get; set; }
-			public static string test { get; set; }
 		}
 
 		public ConfigManager()
