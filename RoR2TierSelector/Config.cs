@@ -26,25 +26,16 @@ namespace RoR2TierSelector
 
 		private void Init()
 		{
-			if (!File.Exists(ConfigPath)) mainConfig = new ConfigFile(ConfigPath, true);
+			mainConfig = new ConfigFile(ConfigPath, true);
 		}
 
 		private void LoadMainConfig()
 		{
 			Internals.configVersion = mainConfig.Bind<int>(
-				new ConfigDefinition("Internals", "Config_Version"),
+				new ConfigDefinition("Internals", "Version"),
 				configVersion,
 				new ConfigDescription("Internal Use to mark changes in config")
 			).Value;
-
-
-			// Was getting Exceptions, do strings not work for config?
-			// string test = "testing";
-			// Internals.test = mainConfig.Bind<string>(
-			// 	new ConfigDefinition("Internals", "Config_Test"),
-			// 	test,
-			// 	new ConfigDescription("Testing")
-			// ).Value;
 		}
 
 		public void reloadConfig()

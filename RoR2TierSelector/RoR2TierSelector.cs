@@ -20,11 +20,12 @@ namespace RoR2TierSelector
 
 		// Use for checking game version.
 		private const string GameBuildId = "1.2.4.1";
-		private static ConfigManager config = new ConfigManager();
+		private static ConfigManager config;
 
 		public void Awake()
 		{
 			Logger.Log(LogLevel.Info, $"Loaded {PluginName} v{PluginVersion}");
+			config = new ConfigManager();
 		}
 
 		private void checkGameVersion(On.RoR2.RoR2Application.orig_Awake orig, RoR2Application self)
