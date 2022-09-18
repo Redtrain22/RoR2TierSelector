@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using RoR2;
 using R2API.Utils;
 using UnityEngine;
+using UnityEngine.Networking;
 using System.Linq;
 
 using ItemCatalog = On.RoR2.ItemCatalog;
