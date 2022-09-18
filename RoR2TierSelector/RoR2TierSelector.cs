@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using RoR2;
+using R2API.Utils;
 using UnityEngine;
 using System.Linq;
 
@@ -10,6 +11,7 @@ namespace RoR2TierSelector
 {
 	// Dependancies
 	[BepInDependency(R2API.R2API.PluginGUID)]
+	[R2APISubmoduleDependency(nameof(CommandHelper))]
 
 	// MetaData for plugin
 	[BepInPlugin(PluginGUID, PluginName, PluginVersion)]
@@ -43,9 +45,12 @@ namespace RoR2TierSelector
 		{
 			Logger.Log(LogLevel.Info, $"Loaded {PluginName} v{PluginVersion}");
 			config = new ConfigManager();
+
+			// Hooks
 			ItemCatalog.SetItemDefs += SetItemDefsHook;
 
-			// config.AddItemToList();
+			// Register Console Commands
+			R2API.Utils.CommandHelper.AddToConsoleWhenReady();
 		}
 
 		private void checkGameVersion(On.RoR2.RoR2Application.orig_Awake orig, RoR2Application self)
@@ -73,6 +78,31 @@ namespace RoR2TierSelector
 			}
 
 			orig.Invoke(itemDefs);
+		}
+
+		[ConCommand(commandName = "set_item_tier", flags = RoR2.ConVarFlags.Engine, helpText = "Sets an item tier.")]
+		private static void ccSetItemTier(RoR2.ConCommandArgs args)
+		{
+			args.CheckArgumentCount(2);
+
+			string itemName = args.TryGetArgString(0);
+			int newTier = (int)args.TryGetArgInt(1);
+			UnityEngine.Debug.Log(newTier);
+			int index = ConfigManager.items.FindIndex(configItem => configItem.Definition.Key.ToLower() == itemName.ToLower());
+			ConfigManager.items.ElementAt(index).Value = newTier;
+
+			UnityEngine.Debug.Log($"{ConfigManager.items.ElementAt(index).Definition.Key} is now set to Tier {newTier} in the config, please restart your game for it to take effect.");
+		}
+
+		[ConCommand(commandName = "get_item_tier", flags = RoR2.ConVarFlags.Engine, helpText = "Gets an item tier.")]
+		private static void ccGetItemTier(RoR2.ConCommandArgs args)
+		{
+			args.CheckArgumentCount(1);
+
+			string itemName = args.TryGetArgString(0);
+			int index = ConfigManager.items.FindIndex(configItem => configItem.Definition.Key.ToLower() == itemName.ToLower());
+
+			UnityEngine.Debug.Log((int)ConfigManager.items.ElementAt(index).Value);
 		}
 	}
 }
