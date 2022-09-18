@@ -47,7 +47,7 @@ namespace RoR2TierSelector
 		public void AddItemToList(List<ConfigEntry<int>> list, RoR2.ItemDef def)
 		{
 			items.Add(mainConfig.Bind<int>(new ConfigDefinition("Items", $"{def.name}"), (int)def.tier, new ConfigDescription("Current tier of: "+ $"{def.tier} "
-			+ "\n key : t1 = 0, t2 = 1, t3 = 2, lun = 3, boss = 4, none = 5")));
+			+ "\n key : white = 0, green = 1, red = 2, lunar = 3, boss = 4, none = 5")));
 		}
 	}
 }
