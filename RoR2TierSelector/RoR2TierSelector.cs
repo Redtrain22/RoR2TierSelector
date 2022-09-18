@@ -87,10 +87,11 @@ namespace RoR2TierSelector
 
 			string itemName = args.TryGetArgString(0);
 			int newTier = (int)args.TryGetArgInt(1);
-			UnityEngine.Debug.Log(newTier);
 			int index = ConfigManager.items.FindIndex(configItem => configItem.Definition.Key.ToLower() == itemName.ToLower());
 			ConfigManager.items.ElementAt(index).Value = newTier;
 
+			// Can't hot reload the item defs without something like reflection.
+			// TODO Load the changed tiers into the game???
 			UnityEngine.Debug.Log($"{ConfigManager.items.ElementAt(index).Definition.Key} is now set to Tier {newTier} in the config, please restart your game for it to take effect.");
 		}
 
