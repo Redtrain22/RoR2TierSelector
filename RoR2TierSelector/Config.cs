@@ -1,6 +1,7 @@
 using BepInEx;
 using BepInEx.Configuration;
 using System.IO;
+using System.Collections.Generic;
 
 namespace RoR2TierSelector
 {
@@ -15,6 +16,8 @@ namespace RoR2TierSelector
 		{
 			public static int configVersion { get; set; }
 		}
+
+		public static List<ConfigEntry<int>> items = new List<ConfigEntry<int>>();
 
 		public ConfigManager()
 		{
@@ -39,6 +42,11 @@ namespace RoR2TierSelector
 		public void ReloadConfig()
 		{
 			mainConfig.Reload();
+		}
+
+		public void AddItemToList(List<ConfigEntry<int>> list, RoR2.ItemDef def)
+		{
+			items.Add(mainConfig.Bind<int>(new ConfigDefinition("Items", $"{def.name}"), (int)def.tier, new ConfigDescription($"{def.name} ")));
 		}
 	}
 }

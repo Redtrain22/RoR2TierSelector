@@ -2,6 +2,9 @@
 using BepInEx.Logging;
 using RoR2;
 using UnityEngine;
+using System.Linq;
+
+using ItemCatalog = On.RoR2.ItemCatalog;
 
 namespace RoR2TierSelector
 {
@@ -21,11 +24,26 @@ namespace RoR2TierSelector
 		// Use for checking game version.
 		private const string GameBuildId = "1.2.4.1";
 		private static ConfigManager config;
+		private enum ItemTiers
+		{
+			Tier1,
+			Tier2,
+			Tier3,
+			Lunar,
+			Boss,
+			NoTier,
+			VoidTier1,
+			VoidTier2,
+			VoidTier3,
+			VoidBoss,
+			AssignedAtRuntime
+		}
 
 		public void Awake()
 		{
 			Logger.Log(LogLevel.Info, $"Loaded {PluginName} v{PluginVersion}");
 			config = new ConfigManager();
+			ItemCatalog.SetItemDefs += SetItemDefsHook;
 
 			// config.AddItemToList();
 		}
@@ -41,6 +59,20 @@ namespace RoR2TierSelector
 			orig(self);
 		}
 
-		// private void Test()
+		private void SetItemDefsHook(ItemCatalog.orig_SetItemDefs orig, ItemDef[] itemDefs)
+		{
+			foreach (var item in itemDefs)
+			{
+				config.AddItemToList(ConfigManager.items, item);
+				int index = ConfigManager.items.FindIndex(configItem => (string)configItem.Definition.Key == item.name);
+				ItemTier tier = (ItemTier)ConfigManager.items.ElementAt(index).Value;
+				if (item.tier != tier)
+				{
+					item.tier = tier;
+				}
+			}
+
+			orig.Invoke(itemDefs);
+		}
 	}
 }
