@@ -27,7 +27,7 @@ namespace RoR2TierSelector
 		// Use for checking game version.
 		private const string GameBuildId = "1.2.4.1";
 		private static ConfigManager config;
-		private enum ItemTiers
+		internal enum ItemTiers
 		{
 			Tier1,
 			Tier2,
@@ -83,27 +83,28 @@ namespace RoR2TierSelector
 		}
 		private void RegisterEquipmentHook(EquipmentCatalog.orig_RegisterEquipment orig, EquipmentIndex equipmentIndex, EquipmentDef equipDef)
 		{
-				config.AddEquipmentToList(ConfigManager.equipments, equipDef);
-				int index = ConfigManager.equipments.FindIndex(configItem => (string)configItem.Definition.Key == equipDef.name);
-				int tier = equipDef.isLunar ? 2 : 1;
-				switch(ConfigManager.equipments.ElementAt(index).Value) {
-					case 1:
-						equipDef.isLunar = false;
-            equipDef.colorIndex = ColorCatalog.ColorIndex.Equipment;
-						break;
-					case 2:
-						equipDef.isLunar = true;
-            equipDef.colorIndex = ColorCatalog.ColorIndex.LunarItem;
-            break;
-					default:
-						equipDef.canDrop = false;
-            equipDef.isLunar = false; // Don't know if this is needed, but better safe than sorry!
-            break;
-				}
+			config.AddEquipmentToList(ConfigManager.equipments, equipDef);
+			int index = ConfigManager.equipments.FindIndex(configItem => (string)configItem.Definition.Key == equipDef.name);
+			int tier = equipDef.isLunar ? 2 : 1;
+			switch (ConfigManager.equipments.ElementAt(index).Value)
+			{
+				case 1:
+					equipDef.isLunar = false;
+					equipDef.colorIndex = ColorCatalog.ColorIndex.Equipment;
+					break;
+				case 2:
+					equipDef.isLunar = true;
+					equipDef.colorIndex = ColorCatalog.ColorIndex.LunarItem;
+					break;
+				default:
+					equipDef.canDrop = false;
+					equipDef.isLunar = false; // Don't know if this is needed, but better safe than sorry!
+					break;
+			}
 
 			orig.Invoke(equipmentIndex, equipDef);
 		}
-		
+
 		[ConCommand(commandName = "set_item_tier", flags = RoR2.ConVarFlags.Engine, helpText = "Sets an item tier.")]
 		private static void ccSetItemTier(RoR2.ConCommandArgs args)
 		{

@@ -2,7 +2,6 @@ using BepInEx;
 using BepInEx.Configuration;
 using System.IO;
 using System.Collections.Generic;
-
 namespace RoR2TierSelector
 {
 	internal class ConfigManager
@@ -18,7 +17,7 @@ namespace RoR2TierSelector
 		}
 
 		public static List<ConfigEntry<int>> items = new List<ConfigEntry<int>>();
-		
+
 		public static List<ConfigEntry<int>> equipments = new List<ConfigEntry<int>>();
 
 		public ConfigManager()
@@ -46,16 +45,18 @@ namespace RoR2TierSelector
 			mainConfig.Reload();
 		}
 
+		// Not a fan of how long this is, but I don't see an easy way to reduce this to a more readable format.
+		private static string itemHelpMessage = $@"{RoR2TierSelector.ItemTiers.Tier1} == {(int)RoR2TierSelector.ItemTiers.Tier1}, {RoR2TierSelector.ItemTiers.Tier2} == {(int)RoR2TierSelector.ItemTiers.Tier2}, {RoR2TierSelector.ItemTiers.Tier3} == {(int)RoR2TierSelector.ItemTiers.Tier3}
+		{RoR2TierSelector.ItemTiers.Boss} == {(int)RoR2TierSelector.ItemTiers.Boss}, {RoR2TierSelector.ItemTiers.Lunar} == {(int)RoR2TierSelector.ItemTiers.Lunar}, {RoR2TierSelector.ItemTiers.NoTier} == {(int)RoR2TierSelector.ItemTiers.NoTier}";
 		public void AddItemToList(List<ConfigEntry<int>> list, RoR2.ItemDef def)
 		{
-			items.Add(mainConfig.Bind<int>(new ConfigDefinition("Items", $"{def.name}"), (int)def.tier, new ConfigDescription( $"{def.name} is {def.tier} by default."
-			+ "\n key : white = 0, green = 1, red = 2, lunar = 3, boss = 4, none = 5")));
+			items.Add(mainConfig.Bind<int>(new ConfigDefinition("Items", $"{def.name}"), (int)def.tier, new ConfigDescription($"{def.name} is {def.tier} by default.\n${itemHelpMessage}")));
 		}
 
-		public void AddEquipmentToList(List<ConfigEntry<int>> list, RoR2.EquipmentDef def) 
+		private static string equipmentHelpMessage = $"None == 0, Standard == 1, Lunar == 2";
+		public void AddEquipmentToList(List<ConfigEntry<int>> list, RoR2.EquipmentDef def)
 		{
-			equipments.Add(mainConfig.Bind<int>(new ConfigDefinition("Equipment", $"{def.name}"), def.isLunar ? 2 : 1, new ConfigDescription($"{def.name} is {(def.isLunar ? 2 : 1)} by default."
-			+ "\n key : none = 0, standard = 1, lunar = 2")));
+			equipments.Add(mainConfig.Bind<int>(new ConfigDefinition("Equipment", $"{def.name}"), def.isLunar ? 2 : 1, new ConfigDescription($"{def.name} is {(def.isLunar ? 2 : 1)} by default.\n{equipmentHelpMessage}")));
 		}
 	}
 }
