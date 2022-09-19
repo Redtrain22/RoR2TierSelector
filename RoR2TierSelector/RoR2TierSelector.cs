@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 using System.Linq;
 
 using ItemCatalog = On.RoR2.ItemCatalog;
+using EquipmentCatalog = On.RoR2.EquipmentCatalog;
 
 namespace RoR2TierSelector
 {
@@ -49,6 +50,7 @@ namespace RoR2TierSelector
 
 			// Hooks
 			ItemCatalog.SetItemDefs += SetItemDefsHook;
+			EquipmentCatalog.SetEquipmentDefs += SetEquipmentDefsHook;
 
 			// Register Console Commands
 			R2API.Utils.CommandHelper.AddToConsoleWhenReady();
@@ -80,7 +82,21 @@ namespace RoR2TierSelector
 
 			orig.Invoke(itemDefs);
 		}
-
+		private void SetEquipmentDefsHook(EquipmentCatalog.orig_SetEquipmentDefs orig, EquipmentDef[] equipDefs)
+		{
+			foreach (var equipment in equipDefs)
+			{
+				config.AddEquipmentToList(ConfigManager.equipments, equipment);
+				int index = ConfigManager.equipments.FindIndex(configItem => (string)configItem.Definition.Key == equipment.name);
+				int tier = equipment.isLunar ? 2 : 1;
+				if ((int)equipment.equipmentIndex != tier)
+				{
+					equipment.equipmentIndex = (EquipmentIndex)tier;
+				}
+			}
+			orig.Invoke(equipDefs);
+		}
+		
 		[ConCommand(commandName = "set_item_tier", flags = RoR2.ConVarFlags.Engine, helpText = "Sets an item tier.")]
 		private static void ccSetItemTier(RoR2.ConCommandArgs args)
 		{

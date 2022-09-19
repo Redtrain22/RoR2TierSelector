@@ -18,6 +18,8 @@ namespace RoR2TierSelector
 		}
 
 		public static List<ConfigEntry<int>> items = new List<ConfigEntry<int>>();
+		
+		public static List<ConfigEntry<int>> equipments = new List<ConfigEntry<int>>();
 
 		public ConfigManager()
 		{
@@ -46,8 +48,14 @@ namespace RoR2TierSelector
 
 		public void AddItemToList(List<ConfigEntry<int>> list, RoR2.ItemDef def)
 		{
-			items.Add(mainConfig.Bind<int>(new ConfigDefinition("Items", $"{def.name}"), (int)def.tier, new ConfigDescription("Current tier of: "+ $"{def.tier} "
+			items.Add(mainConfig.Bind<int>(new ConfigDefinition("Items", $"{def.name}"), (int)def.itemIndex, new ConfigDescription( $"{def.name} Currently has a tier of: {def.tier}"
 			+ "\n key : white = 0, green = 1, red = 2, lunar = 3, boss = 4, none = 5")));
+		}
+
+		public void AddEquipmentToList(List<ConfigEntry<int>> list, RoR2.EquipmentDef def) 
+		{
+			equipments.Add(mainConfig.Bind<int>(new ConfigDefinition("Equipment", $"{def.name}"), (int)def.equipmentIndex, new ConfigDescription($"{def.nameToken} Currently has a tier of: {def.colorIndex}"
+			+ "\n key : none = 0, standard = 1, lunar = 2")));
 		}
 	}
 }
