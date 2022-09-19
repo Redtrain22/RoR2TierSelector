@@ -54,7 +54,7 @@ namespace RoR2TierSelector
 
 		public void AddEquipmentToList(List<ConfigEntry<int>> list, RoR2.EquipmentDef def) 
 		{
-			equipments.Add(mainConfig.Bind<int>(new ConfigDefinition("Equipment", $"{def.name}"), (int)def.equipmentIndex, new ConfigDescription($"{def.nameToken} Currently has a tier of: {def.colorIndex}"
+			equipments.Add(mainConfig.Bind<int>(new ConfigDefinition("Equipment", $"{def.name}"), def.isLunar ? 2 : 1, new ConfigDescription($"{def.name} is {(def.isLunar ? 2 : 1)} by default."
 			+ "\n key : none = 0, standard = 1, lunar = 2")));
 		}
 	}

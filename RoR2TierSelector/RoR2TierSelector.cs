@@ -3,7 +3,6 @@ using BepInEx.Logging;
 using RoR2;
 using R2API.Utils;
 using UnityEngine;
-using UnityEngine.Networking;
 using System.Linq;
 
 using ItemCatalog = On.RoR2.ItemCatalog;
@@ -50,7 +49,7 @@ namespace RoR2TierSelector
 
 			// Hooks
 			ItemCatalog.SetItemDefs += SetItemDefsHook;
-			EquipmentCatalog.SetEquipmentDefs += SetEquipmentDefsHook;
+			EquipmentCatalog.RegisterEquipment += RegisterEquipmentHook;
 
 			// Register Console Commands
 			R2API.Utils.CommandHelper.AddToConsoleWhenReady();
@@ -82,19 +81,27 @@ namespace RoR2TierSelector
 
 			orig.Invoke(itemDefs);
 		}
-		private void SetEquipmentDefsHook(EquipmentCatalog.orig_SetEquipmentDefs orig, EquipmentDef[] equipDefs)
+		private void RegisterEquipmentHook(EquipmentCatalog.orig_RegisterEquipment orig, EquipmentIndex equipmentIndex, EquipmentDef equipDef)
 		{
-			foreach (var equipment in equipDefs)
-			{
-				config.AddEquipmentToList(ConfigManager.equipments, equipment);
-				int index = ConfigManager.equipments.FindIndex(configItem => (string)configItem.Definition.Key == equipment.name);
-				int tier = equipment.isLunar ? 2 : 1;
-				if ((int)equipment.equipmentIndex != tier)
-				{
-					equipment.equipmentIndex = (EquipmentIndex)tier;
+				config.AddEquipmentToList(ConfigManager.equipments, equipDef);
+				int index = ConfigManager.equipments.FindIndex(configItem => (string)configItem.Definition.Key == equipDef.name);
+				int tier = equipDef.isLunar ? 2 : 1;
+				switch(ConfigManager.equipments.ElementAt(index).Value) {
+					case 1:
+						equipDef.isLunar = false;
+            equipDef.colorIndex = ColorCatalog.ColorIndex.Equipment;
+						break;
+					case 2:
+						equipDef.isLunar = true;
+            equipDef.colorIndex = ColorCatalog.ColorIndex.LunarItem;
+            break;
+					default:
+						equipDef.canDrop = false;
+            equipDef.isLunar = false; // Don't know if this is needed, but better safe than sorry!
+            break;
 				}
-			}
-			orig.Invoke(equipDefs);
+
+			orig.Invoke(equipmentIndex, equipDef);
 		}
 		
 		[ConCommand(commandName = "set_item_tier", flags = RoR2.ConVarFlags.Engine, helpText = "Sets an item tier.")]
