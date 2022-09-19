@@ -7,6 +7,10 @@
 	<!-- TODO Cleanup, just copied from -->
 	<!-- https://risk-of-thunder.github.io/R2Wiki/Mod-Creation/IDE/Visual-Studio-Code/ -->
   <ItemGroup>
+    <Reference Include="HLAPI-Runtime">
+      <HintPath>libs/com.unity.multiplayer-hlapi.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>libs/Assembly-CSharp.dll</HintPath>
       <Private>false</Private>

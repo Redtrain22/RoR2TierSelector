@@ -4,6 +4,8 @@ using RoR2;
 using R2API.Utils;
 using UnityEngine;
 using System.Linq;
+using R2API.Networking;
+using R2API.Networking.Interfaces;
 
 using ItemCatalog = On.RoR2.ItemCatalog;
 using EquipmentCatalog = On.RoR2.EquipmentCatalog;
@@ -12,8 +14,7 @@ namespace RoR2TierSelector
 {
 	// Dependancies
 	[BepInDependency(R2API.R2API.PluginGUID)]
-	[R2APISubmoduleDependency(nameof(CommandHelper))]
-
+	[R2APISubmoduleDependency(nameof(CommandHelper), nameof(NetworkingAPI))]
 	// MetaData for plugin
 	[BepInPlugin(PluginGUID, PluginName, PluginVersion)]
 	public class RoR2TierSelector : BaseUnityPlugin
@@ -83,24 +84,23 @@ namespace RoR2TierSelector
 		}
 		private void RegisterEquipmentHook(EquipmentCatalog.orig_RegisterEquipment orig, EquipmentIndex equipmentIndex, EquipmentDef equipDef)
 		{
-			config.AddEquipmentToList(ConfigManager.equipments, equipDef);
-			int index = ConfigManager.equipments.FindIndex(configItem => (string)configItem.Definition.Key == equipDef.name);
-			int tier = equipDef.isLunar ? 2 : 1;
-			switch (ConfigManager.equipments.ElementAt(index).Value)
-			{
-				case 1:
-					equipDef.isLunar = false;
-					equipDef.colorIndex = ColorCatalog.ColorIndex.Equipment;
-					break;
-				case 2:
-					equipDef.isLunar = true;
-					equipDef.colorIndex = ColorCatalog.ColorIndex.LunarItem;
-					break;
-				default:
-					equipDef.canDrop = false;
-					equipDef.isLunar = false; // Don't know if this is needed, but better safe than sorry!
-					break;
-			}
+				config.AddEquipmentToList(ConfigManager.equipments, equipDef);
+				int index = ConfigManager.equipments.FindIndex(configItem => (string)configItem.Definition.Key == equipDef.name);
+				int tier = equipDef.isLunar ? 2 : 1;
+				switch(ConfigManager.equipments.ElementAt(index).Value) {
+					case 1:
+						equipDef.isLunar = false;
+						equipDef.colorIndex = ColorCatalog.ColorIndex.Equipment;
+						break;
+					case 2:
+						equipDef.isLunar = true;
+						equipDef.colorIndex = ColorCatalog.ColorIndex.LunarItem;
+						break;
+					default:
+						equipDef.canDrop = false;
+						equipDef.isLunar = false; // Don't know if this is needed, but better safe than sorry!
+						break;
+				}
 
 			orig.Invoke(equipmentIndex, equipDef);
 		}
@@ -131,4 +131,32 @@ namespace RoR2TierSelector
 			UnityEngine.Debug.Log((int)ConfigManager.items.ElementAt(index).Value);
 		}
 	}
+	// public class SyncConfig : INetMessage
+	// {
+	// 			NetworkInstanceId netId;
+	// 			Vector3 position;
+  //       int number;
+
+  //       public void Deserialize(NetworkReader reader)
+  //       {
+  //           netId = reader.ReadNetworkId();
+  //           position = reader.ReadVector3();
+  //           number = reader.ReadInt32();
+  //       }
+
+  //       public void OnReceived()
+  //       {
+  //           if(NetworkServer.active)
+	// 					{
+							
+	// 					}
+  //       }
+
+  //       public void Serialize(NetworkWriter writer)
+  //       {
+  //           writer.Write(netId);
+  //           writer.Write(position);
+  //           writer.Write(number);
+  //       }
+	// }
 }
