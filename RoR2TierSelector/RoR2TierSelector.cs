@@ -109,6 +109,7 @@ namespace RoR2TierSelector
 					break;
 			}
 
+			config.AddEquipmentGUISetting(equipDef);
 			orig.Invoke(equipmentIndex, equipDef);
 		}
 

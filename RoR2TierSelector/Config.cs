@@ -5,6 +5,8 @@ using RiskOfOptions.Options;
 using RiskOfOptions.OptionConfigs;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
+
 namespace RoR2TierSelector
 {
 	internal class ConfigManager
@@ -43,6 +45,9 @@ namespace RoR2TierSelector
 			).Value;
 		}
 
+		/// <summary>
+		/// This function will add *all items* in the items List to the GUI for editing.
+		/// </summary>
 		public void AddItemGUISettings()
 		{
 			ModSettingsManager.SetModDescription("Set custom item tiers");
@@ -53,6 +58,20 @@ namespace RoR2TierSelector
 					new IntSliderOption(item, new IntSliderConfig { min = (int)RoR2TierSelector.ItemTiers.Tier1, max = (int)RoR2TierSelector.ItemTiers.NoTier, restartRequired = true })
 				);
 			});
+		}
+
+		/// <summary>
+		/// This function will add *a single equipment* in the equipments List to the GUI for editing.
+		/// You must pass the EquipmentDef that you want to add to list to this function.
+		/// </summary>
+		public void AddEquipmentGUISetting(RoR2.EquipmentDef equipDef)
+		{
+			int index = equipments.FindIndex(configItem => (string)configItem.Definition.Key == equipDef.name);
+			ConfigEntry<int> equipment = equipments.ElementAt(index);
+
+			ModSettingsManager.AddOption(
+				new IntSliderOption(equipment, new IntSliderConfig { min = (int)RoR2TierSelector.ItemTiers.Tier1, max = (int)RoR2TierSelector.ItemTiers.NoTier, restartRequired = true })
+			);
 		}
 
 		public void ReloadConfig()
