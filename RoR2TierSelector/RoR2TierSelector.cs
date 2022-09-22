@@ -12,6 +12,7 @@ using EquipmentCatalog = On.RoR2.EquipmentCatalog;
 namespace RoR2TierSelector
 {
 	// Dependancies
+	[BepInDependency("com.rune580.riskofoptions")]
 	[BepInDependency(R2API.R2API.PluginGUID)]
 	[R2APISubmoduleDependency(nameof(CommandHelper), nameof(NetworkingAPI))]
 
@@ -84,6 +85,7 @@ namespace RoR2TierSelector
 				}
 			}
 
+			config.AddItemGUISettings();
 			orig.Invoke(itemDefs);
 		}
 		private void RegisterEquipmentHook(EquipmentCatalog.orig_RegisterEquipment orig, EquipmentIndex equipmentIndex, EquipmentDef equipDef)

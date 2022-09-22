@@ -1,5 +1,8 @@
 using BepInEx;
 using BepInEx.Configuration;
+using RiskOfOptions;
+using RiskOfOptions.Options;
+using RiskOfOptions.OptionConfigs;
 using System.IO;
 using System.Collections.Generic;
 namespace RoR2TierSelector
@@ -38,6 +41,18 @@ namespace RoR2TierSelector
 				configVersion,
 				new ConfigDescription("Internal Use to mark changes in config")
 			).Value;
+		}
+
+		public void AddItemGUISettings()
+		{
+			ModSettingsManager.SetModDescription("Set custom item tiers");
+
+			items.ForEach((item) =>
+			{
+				ModSettingsManager.AddOption(
+					new IntSliderOption(item, new IntSliderConfig { min = (int)RoR2TierSelector.ItemTiers.Tier1, max = (int)RoR2TierSelector.ItemTiers.NoTier, restartRequired = true })
+				);
+			});
 		}
 
 		public void ReloadConfig()
