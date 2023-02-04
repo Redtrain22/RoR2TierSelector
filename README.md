@@ -19,7 +19,7 @@ TBW
 - Clone this repo
 - Grab the required libraries from [here](https://github.com/xiaoxiao921/R2Boilerplate) 
 - Move the dlls in the ExamplePlugin `libs` folder to this project's `libs` folder (if using WSL2 you can use `explorer.exe .` (dot matters) to open current directory in File Explorer)
-- Run a `nuget install` in the repo to install the other dependencies
+- Run a `nuget install` in the repo to install the other dependencies. Then run a `dotnet restore`
 
 # Credits
 - Inspired by [RoR2TierSelection](https://github.com/Theray070696/RoR2TierSelection)
