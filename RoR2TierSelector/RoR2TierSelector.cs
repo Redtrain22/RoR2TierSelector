@@ -14,7 +14,6 @@ namespace RoR2TierSelector
 	// Dependancies
 	[BepInDependency("com.rune580.riskofoptions")]
 	[BepInDependency(R2API.R2API.PluginGUID)]
-	[R2APISubmoduleDependency(nameof(CommandHelper), nameof(NetworkingAPI))]
 
 	// MetaData for plugin
 	[BepInPlugin(PluginGUID, PluginName, PluginVersion)]
