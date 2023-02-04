@@ -27,8 +27,6 @@
 	</ItemGroup>
 
 	<!-- Base Game Dependancies -->
-	<!-- TODO Cleanup, just copied from -->
-	<!-- https://risk-of-thunder.github.io/R2Wiki/Mod-Creation/IDE/Visual-Studio-Code/ -->
 	<ItemGroup>
 		<Reference Include="Facepunch.Steamworks">
 			<HintPath>libs\Facepunch.Steamworks.dll</HintPath>
