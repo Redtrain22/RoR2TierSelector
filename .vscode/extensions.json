@@ -1,0 +1,7 @@
+{
+	"recommendations": [
+		"redhat.vscode-xml",
+		"ms-dotnettools.csharp",
+		"Gruntfuggly.todo-tree"
+	]
+}
