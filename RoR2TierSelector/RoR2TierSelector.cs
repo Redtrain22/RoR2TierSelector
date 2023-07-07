@@ -11,7 +11,7 @@ using ItemCatalog = On.RoR2.ItemCatalog;
 using EquipmentCatalog = On.RoR2.EquipmentCatalog;
 
 // New way to register commands
-[assembly: HG.Reflection.SearchableAttribute.OptInAttribute]
+[assembly: HG.Reflection.SearchableAttribute.OptIn]
 namespace RoR2TierSelector
 {
 	// Dependancies
@@ -59,13 +59,13 @@ namespace RoR2TierSelector
 		{
 			Logger.Log(LogLevel.Info, $"Loaded {PluginName} v{PluginVersion}");
 			config = new ConfigManager();
-	
+
 			NetworkingAPI.RegisterMessageType<SyncConfig>();
 
 			// Hooks
 			EquipmentCatalog.RegisterEquipment += RegisterEquipmentHook;
 			ItemCatalog.SetItemDefs += SetItemDefsHook;
-			Logger.Log(LogLevel.Info,$"Hooks Added.");
+			Logger.Log(LogLevel.Info, $"Hooks Added.");
 		}
 		private void checkGameVersion(On.RoR2.RoR2Application.orig_Awake orig, RoR2Application self)
 		{
@@ -78,45 +78,45 @@ namespace RoR2TierSelector
 			orig(self);
 		}
 
-    private static void ReloadItemTiers(ItemIndex[] itemIndexes)
-    {
-      // // Using "Reflection" to grab the itemDefs Directly out of scope
-      FieldInfo itemDefsField = typeof(ItemCatalog).GetField("itemDefs", BindingFlags.NonPublic | BindingFlags.Static);
-      // itemDefsField is static so reflecting it doesnt require an instance
-      ItemDef[] itemDefs = (ItemDef[])itemDefsField.GetValue(null);
-      foreach (var itemIndex in itemIndexes)
-      {
-        ItemDef itemDef = itemDefs[(int)itemIndex];
-        if (itemDef != null)
-        {
-          int index = ConfigManager.items.FindIndex(configItem => (string)configItem.Definition.Key == itemDef.name);
-          ItemTier tier = (ItemTier)ConfigManager.items.ElementAt(index).Value;
-          if (itemDef.tier != tier)
-          {
-            itemDef.tier = tier;
-          }
-        }
-      }
-      // Getting the SetItemDefs method
-      MethodInfo setItemDefsMethod = typeof(ItemCatalog).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static);
+		private static void ReloadItemTiers(ItemIndex[] itemIndexes)
+		{
+			// // Using "Reflection" to grab the itemDefs Directly out of scope
+			FieldInfo itemDefsField = typeof(ItemCatalog).GetField("itemDefs", BindingFlags.NonPublic | BindingFlags.Static);
+			// itemDefsField is static so reflecting it doesnt require an instance
+			ItemDef[] itemDefs = (ItemDef[])itemDefsField.GetValue(null);
+			foreach (var itemIndex in itemIndexes)
+			{
+				ItemDef itemDef = itemDefs[(int)itemIndex];
+				if (itemDef != null)
+				{
+					int index = ConfigManager.items.FindIndex(configItem => (string)configItem.Definition.Key == itemDef.name);
+					ItemTier tier = (ItemTier)ConfigManager.items.ElementAt(index).Value;
+					if (itemDef.tier != tier)
+					{
+						itemDef.tier = tier;
+					}
+				}
+			}
+			// Getting the SetItemDefs method
+			MethodInfo setItemDefsMethod = typeof(ItemCatalog).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static);
 
-      // Invoke the SetItemDefs method passing the new itemDefs
-      setItemDefsMethod.Invoke(null, new object[] { itemDefs });
-    }
+			// Invoke the SetItemDefs method passing the new itemDefs
+			setItemDefsMethod.Invoke(null, new object[] { itemDefs });
+		}
 		public static void ReloadItemTiers()
-    {
-      ItemIndex[] itemIndexes = RoR2.ItemCatalog.allItems.ToArray();
-      ReloadItemTiers(itemIndexes);
+		{
+			ItemIndex[] itemIndexes = RoR2.ItemCatalog.allItems.ToArray();
+			ReloadItemTiers(itemIndexes);
 
 			// // Getting the SetItemDefs method
-      //   MethodInfo setInitMethod = typeof(ItemCatalog).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static);
-        
-      //   // Invoke the SetItemDefs method passing the new itemDefs
+			//   MethodInfo setInitMethod = typeof(ItemCatalog).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static);
+
+			//   // Invoke the SetItemDefs method passing the new itemDefs
 			// 	setInitMethod.Invoke(null, null);
 
-      // Reload item GUI settings if needed
-      config.AddItemGUISettings();
-    }
+			// Reload item GUI settings if needed
+			config.AddItemGUISettings();
+		}
 		private void SetItemDefsHook(ItemCatalog.orig_SetItemDefs orig, ItemDef[] itemDefs)
 		{
 			foreach (ItemDef item in itemDefs)
@@ -133,7 +133,7 @@ namespace RoR2TierSelector
 			config.AddItemGUISettings();
 			orig.Invoke(itemDefs);
 		}
- 
+
 		private void RegisterEquipmentHook(EquipmentCatalog.orig_RegisterEquipment orig, EquipmentIndex equipmentIndex, EquipmentDef equipDef)
 		{
 			config.AddEquipmentToList(ConfigManager.equipments, equipDef);
