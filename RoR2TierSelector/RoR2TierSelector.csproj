@@ -15,9 +15,9 @@
 		<PackageReference Include="MMHOOK.RoR2" Version="2022.9.20">
 			<NoWarn>NU1701</NoWarn>
 		</PackageReference>
-		<PackageReference Include="R2API.Core" Version="5.0.4" />
+		<PackageReference Include="R2API.Core" Version="5.0.10" />
 		<PackageReference Include="R2API.Networking" Version="1.0.2" />
-		<PackageReference Include="R2API.CommandHelper" Version="1.0.0" />
+		<PackageReference Include="R2API.CommandHelper" Version="1.0.1" />
 	</ItemGroup>
 
 	<!-- Mod Dependancies -->
