@@ -5,18 +5,25 @@ using R2API.Utils;
 using UnityEngine;
 using System.Linq;
 using R2API.Networking;
+using System.Reflection;
 
 using ItemCatalog = On.RoR2.ItemCatalog;
 using EquipmentCatalog = On.RoR2.EquipmentCatalog;
 
+// New way to register commands
+[assembly: HG.Reflection.SearchableAttribute.OptInAttribute]
 namespace RoR2TierSelector
 {
 	// Dependancies
-	[BepInDependency("com.rune580.riskofoptions")]
+	// This is a solid mod choice to use to create a menu in the game to change item values
+	// [BepInDependency("com.rune580.riskofoptions")]
 	[BepInDependency(R2API.R2API.PluginGUID)]
 
 	// MetaData for plugin
 	[BepInPlugin(PluginGUID, PluginName, PluginVersion)]
+
+	// NetworkingAPI for plugin
+	[BepInDependency(NetworkingAPI.PluginGUID)]
 
 	// Network Compatibility
 	[NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
@@ -30,7 +37,9 @@ namespace RoR2TierSelector
 
 		// Use for checking game version.
 		private const string GameBuildId = "1.2.4.1";
-		private static ConfigManager config;
+		internal static ConfigManager config;
+
+		internal static UnityEngine.Logger tierLogger;
 		internal enum ItemTiers
 		{
 			Tier1,
@@ -50,16 +59,14 @@ namespace RoR2TierSelector
 		{
 			Logger.Log(LogLevel.Info, $"Loaded {PluginName} v{PluginVersion}");
 			config = new ConfigManager();
+	
 			NetworkingAPI.RegisterMessageType<SyncConfig>();
 
 			// Hooks
-			ItemCatalog.SetItemDefs += SetItemDefsHook;
 			EquipmentCatalog.RegisterEquipment += RegisterEquipmentHook;
-
-			// Register Console Commands
-			R2API.Utils.CommandHelper.AddToConsoleWhenReady();
+			ItemCatalog.SetItemDefs += SetItemDefsHook;
+			Logger.Log(LogLevel.Info,$"Hooks Added.");
 		}
-
 		private void checkGameVersion(On.RoR2.RoR2Application.orig_Awake orig, RoR2Application self)
 		{
 			var buildId = Application.version;
@@ -71,9 +78,48 @@ namespace RoR2TierSelector
 			orig(self);
 		}
 
+    private static void ReloadItemTiers(ItemIndex[] itemIndexes)
+    {
+      // // Using "Reflection" to grab the itemDefs Directly out of scope
+      FieldInfo itemDefsField = typeof(ItemCatalog).GetField("itemDefs", BindingFlags.NonPublic | BindingFlags.Static);
+      // itemDefsField is static so reflecting it doesnt require an instance
+      ItemDef[] itemDefs = (ItemDef[])itemDefsField.GetValue(null);
+      foreach (var itemIndex in itemIndexes)
+      {
+        ItemDef itemDef = itemDefs[(int)itemIndex];
+        if (itemDef != null)
+        {
+          int index = ConfigManager.items.FindIndex(configItem => (string)configItem.Definition.Key == itemDef.name);
+          ItemTier tier = (ItemTier)ConfigManager.items.ElementAt(index).Value;
+          if (itemDef.tier != tier)
+          {
+            itemDef.tier = tier;
+          }
+        }
+      }
+      // Getting the SetItemDefs method
+      MethodInfo setItemDefsMethod = typeof(ItemCatalog).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static);
+
+      // Invoke the SetItemDefs method passing the new itemDefs
+      setItemDefsMethod.Invoke(null, new object[] { itemDefs });
+    }
+		public static void ReloadItemTiers()
+    {
+      ItemIndex[] itemIndexes = RoR2.ItemCatalog.allItems.ToArray();
+      ReloadItemTiers(itemIndexes);
+
+			// // Getting the SetItemDefs method
+      //   MethodInfo setInitMethod = typeof(ItemCatalog).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static);
+        
+      //   // Invoke the SetItemDefs method passing the new itemDefs
+			// 	setInitMethod.Invoke(null, null);
+
+      // Reload item GUI settings if needed
+      config.AddItemGUISettings();
+    }
 		private void SetItemDefsHook(ItemCatalog.orig_SetItemDefs orig, ItemDef[] itemDefs)
 		{
-			foreach (var item in itemDefs)
+			foreach (ItemDef item in itemDefs)
 			{
 				config.AddItemToList(ConfigManager.items, item);
 				int index = ConfigManager.items.FindIndex(configItem => (string)configItem.Definition.Key == item.name);
@@ -87,6 +133,7 @@ namespace RoR2TierSelector
 			config.AddItemGUISettings();
 			orig.Invoke(itemDefs);
 		}
+ 
 		private void RegisterEquipmentHook(EquipmentCatalog.orig_RegisterEquipment orig, EquipmentIndex equipmentIndex, EquipmentDef equipDef)
 		{
 			config.AddEquipmentToList(ConfigManager.equipments, equipDef);

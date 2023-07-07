@@ -30,7 +30,6 @@ namespace RoR2TierSelector
 			Init();
 			LoadMainConfig();
 		}
-
 		private void Init()
 		{
 			mainConfig = new ConfigFile(ConfigPath, true);
