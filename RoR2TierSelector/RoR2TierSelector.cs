@@ -31,8 +31,9 @@ namespace RoR2TierSelector
 	{
 		public const string PluginGUID = "me.redtrain.ror2tierselector";
 		public const string PluginName = "RoR2TierSelector";
-		// Note this project is also Authored by Heringfish02 just I don't know how to have multiple authors
-		public const string PluginAuthor = "Redtrain22";
+		// Note this project is also authored by Redtrain22 and Heringfish02.
+		// The plugin author is thus a combination of the two usernames.
+		public const string PluginAuthor = "RedHering";
 		public const string PluginVersion = "0.0.1";
 
 		// Use for checking game version.
