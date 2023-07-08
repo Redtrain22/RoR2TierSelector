@@ -14,7 +14,7 @@ using EquipmentCatalog = On.RoR2.EquipmentCatalog;
 [assembly: HG.Reflection.SearchableAttribute.OptIn]
 namespace RoR2TierSelector
 {
-	// Dependancies
+	// Dependencies
 	// This is a solid mod choice to use to create a menu in the game to change item values
 	// [BepInDependency("com.rune580.riskofoptions")]
 	[BepInDependency(R2API.R2API.PluginGUID)]
@@ -79,44 +79,41 @@ namespace RoR2TierSelector
 			orig(self);
 		}
 
-		private static void ReloadItemTiers(ItemIndex[] itemIndexes)
+		// private static void ReloadItemTiers(ItemIndex[] itemIndexes)
+		// {
+		// 	// // Using "Reflection" to grab the itemDefs Directly out of scope
+		// 	FieldInfo itemDefsField = typeof(ItemCatalog).GetField("itemDefs", BindingFlags.NonPublic | BindingFlags.Static);
+		// 	// itemDefsField is static so reflecting it doesnt require an instance
+		// 	ItemDef[] itemDefs = (ItemDef[])itemDefsField.GetValue(null);
+		// 	foreach (var itemIndex in itemIndexes)
+		// 	{
+		// 		ItemDef itemDef = itemDefs[(int)itemIndex];
+		// 		if (itemDef != null)
+		// 		{
+		// 			int index = ConfigManager.items.FindIndex(configItem => (string)configItem.Definition.Key == itemDef.name);
+		// 			ItemTier tier = (ItemTier)ConfigManager.items.ElementAt(index).Value;
+		// 			if (itemDef.tier != tier)
+		// 			{
+		// 				itemDef.tier = tier;
+		// 			}
+		// 		}
+		// 	}
+		// 	// Getting the SetItemDefs method
+		// 	MethodInfo setItemDefsMethod = typeof(ItemCatalog).GetMethod("SetItemDefs", BindingFlags.NonPublic | BindingFlags.Static);
+
+		// 	// Invoke the SetItemDefs method passing the new itemDefs
+		// 	setItemDefsMethod.Invoke(null, new object[] { itemDefs });
+		// }
+		private static void ReloadItemTiers()
 		{
-			// // Using "Reflection" to grab the itemDefs Directly out of scope
-			FieldInfo itemDefsField = typeof(ItemCatalog).GetField("itemDefs", BindingFlags.NonPublic | BindingFlags.Static);
-			// itemDefsField is static so reflecting it doesnt require an instance
-			ItemDef[] itemDefs = (ItemDef[])itemDefsField.GetValue(null);
-			foreach (var itemIndex in itemIndexes)
-			{
-				ItemDef itemDef = itemDefs[(int)itemIndex];
-				if (itemDef != null)
-				{
-					int index = ConfigManager.items.FindIndex(configItem => (string)configItem.Definition.Key == itemDef.name);
-					ItemTier tier = (ItemTier)ConfigManager.items.ElementAt(index).Value;
-					if (itemDef.tier != tier)
-					{
-						itemDef.tier = tier;
-					}
-				}
-			}
-			// Getting the SetItemDefs method
-			MethodInfo setItemDefsMethod = typeof(ItemCatalog).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static);
+			// ItemIndex[] itemIndexes = RoR2.ItemCatalog.allItems.ToArray();
+			// ReloadItemTiers(itemIndexes);
 
-			// Invoke the SetItemDefs method passing the new itemDefs
-			setItemDefsMethod.Invoke(null, new object[] { itemDefs });
-		}
-		public static void ReloadItemTiers()
-		{
-			ItemIndex[] itemIndexes = RoR2.ItemCatalog.allItems.ToArray();
-			ReloadItemTiers(itemIndexes);
+			// Getting the Init method
+			MethodInfo setInitMethod = typeof(ItemCatalog).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static);
 
-			// // Getting the SetItemDefs method
-			//   MethodInfo setInitMethod = typeof(ItemCatalog).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static);
-
-			//   // Invoke the SetItemDefs method passing the new itemDefs
-			// 	setInitMethod.Invoke(null, null);
-
-			// Reload item GUI settings if needed
-			config.AddItemGUISettings();
+			// Invoke the Init method passing the new itemDefs
+			setInitMethod.Invoke(null, null);
 		}
 		private void SetItemDefsHook(ItemCatalog.orig_SetItemDefs orig, ItemDef[] itemDefs)
 		{
@@ -133,6 +130,7 @@ namespace RoR2TierSelector
 
 			config.AddItemGUISettings();
 			orig.Invoke(itemDefs);
+			Logger.Log(LogLevel.Debug, "Items are changing");
 		}
 
 		private void RegisterEquipmentHook(EquipmentCatalog.orig_RegisterEquipment orig, EquipmentIndex equipmentIndex, EquipmentDef equipDef)
@@ -172,6 +170,8 @@ namespace RoR2TierSelector
 
 			// Can't hot reload the item defs without something like reflection.
 			// TODO Load the changed tiers into the game???
+			ReloadItemTiers();
+
 			UnityEngine.Debug.Log($"{ConfigManager.items.ElementAt(index).Definition.Key} is now set to Tier {newTier} in the config, please restart your game for it to take effect.");
 		}
 
