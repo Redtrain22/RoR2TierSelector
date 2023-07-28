@@ -3,9 +3,12 @@ using BepInEx.Logging;
 using RoR2;
 using R2API.Utils;
 using UnityEngine;
+using System;
 using System.Linq;
 using R2API.Networking;
+using UnityEngine.Networking;
 using System.Reflection;
+using System.Collections.Generic;
 
 using ItemCatalog = On.RoR2.ItemCatalog;
 using EquipmentCatalog = On.RoR2.EquipmentCatalog;
@@ -39,8 +42,6 @@ namespace RoR2TierSelector
 		// Use for checking game version.
 		private const string GameBuildId = "1.2.4.1";
 		internal static ConfigManager config;
-
-		internal static UnityEngine.Logger tierLogger;
 		internal enum ItemTiers
 		{
 			Tier1,
@@ -66,8 +67,8 @@ namespace RoR2TierSelector
 			// Hooks
 			EquipmentCatalog.RegisterEquipment += RegisterEquipmentHook;
 			ItemCatalog.SetItemDefs += SetItemDefsHook;
-			Logger.Log(LogLevel.Info, $"Hooks Added.");
 		}
+
 		private void checkGameVersion(On.RoR2.RoR2Application.orig_Awake orig, RoR2Application self)
 		{
 			var buildId = Application.version;
@@ -79,41 +80,50 @@ namespace RoR2TierSelector
 			orig(self);
 		}
 
-		// private static void ReloadItemTiers(ItemIndex[] itemIndexes)
-		// {
-		// 	// // Using "Reflection" to grab the itemDefs Directly out of scope
-		// 	FieldInfo itemDefsField = typeof(ItemCatalog).GetField("itemDefs", BindingFlags.NonPublic | BindingFlags.Static);
-		// 	// itemDefsField is static so reflecting it doesnt require an instance
-		// 	ItemDef[] itemDefs = (ItemDef[])itemDefsField.GetValue(null);
-		// 	foreach (var itemIndex in itemIndexes)
-		// 	{
-		// 		ItemDef itemDef = itemDefs[(int)itemIndex];
-		// 		if (itemDef != null)
-		// 		{
-		// 			int index = ConfigManager.items.FindIndex(configItem => (string)configItem.Definition.Key == itemDef.name);
-		// 			ItemTier tier = (ItemTier)ConfigManager.items.ElementAt(index).Value;
-		// 			if (itemDef.tier != tier)
-		// 			{
-		// 				itemDef.tier = tier;
-		// 			}
-		// 		}
-		// 	}
-		// 	// Getting the SetItemDefs method
-		// 	MethodInfo setItemDefsMethod = typeof(ItemCatalog).GetMethod("SetItemDefs", BindingFlags.NonPublic | BindingFlags.Static);
-
-		// 	// Invoke the SetItemDefs method passing the new itemDefs
-		// 	setItemDefsMethod.Invoke(null, new object[] { itemDefs });
-		// }
-		private static void ReloadItemTiers()
+		private static void LogRoR2Assemblies()
 		{
-			// ItemIndex[] itemIndexes = RoR2.ItemCatalog.allItems.ToArray();
-			// ReloadItemTiers(itemIndexes);
+			Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-			// Getting the Init method
-			MethodInfo setInitMethod = typeof(ItemCatalog).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static);
+			foreach (Assembly assembly in assemblies)
+			{
+				if (!assembly.FullName.StartsWith("RoR2") | !assembly.FullName.StartsWith("RoR2.Items"))
+					continue;
 
-			// Invoke the Init method passing the new itemDefs
-			setInitMethod.Invoke(null, null);
+				Type[] types = assembly.GetTypes();
+
+				Debug.Log($"Types in assembly '{assembly.FullName}':");
+				foreach (Type type in types)
+				{
+					Debug.Log(type.FullName);
+				}
+			}
+		}
+		 public static void LogAvailableFields()
+    {
+        Type itemCatalogType = typeof(RoR2.ItemCatalog);
+        FieldInfo[] fields = itemCatalogType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+
+        Debug.Log("Available Fields in ItemCatalog:");
+
+        foreach (FieldInfo field in fields)
+        {
+            Debug.Log("Field Name: " + field.Name);
+            Debug.Log("Declaring Type: " + field.DeclaringType);
+            Debug.Log("Field Type: " + field.FieldType);
+            Debug.Log("-------------------------");
+        }
+    }
+
+		internal static void ReloadItemTiers()
+		{
+			// Re-Initialize the item and equipment Defs, and Display Rules to work with Command / Log Book
+			typeof(RoR2.ItemCatalog).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static)?.Invoke(null, null);
+			typeof(RoR2.ItemDisplayRuleSet).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static)?.Invoke(null, null);
+			typeof(RoR2.MiscPickupCatalog).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static)?.Invoke(null, null);
+			typeof(RoR2.PickupCatalog).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static)?.Invoke(null, null);
+			typeof(RoR2.UI.ItemInventoryDisplay).GetMethod("ResetItems", BindingFlags.Public)?.Invoke(null, null);
+			typeof(RoR2.UI.ItemInventoryDisplay).GetMethod("UpdateDisplay", BindingFlags.Public)?.Invoke(null, null);
+			typeof(RoR2.UI.LogBook.LogBookController).GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Static)?.Invoke(null, null);
 		}
 		private void SetItemDefsHook(ItemCatalog.orig_SetItemDefs orig, ItemDef[] itemDefs)
 		{
@@ -130,7 +140,7 @@ namespace RoR2TierSelector
 
 			config.AddItemGUISettings();
 			orig.Invoke(itemDefs);
-			Logger.Log(LogLevel.Debug, "Items are changing");
+			// Logger.Log(LogLevel.Debug, "Items are changing");
 		}
 
 		private void RegisterEquipmentHook(EquipmentCatalog.orig_RegisterEquipment orig, EquipmentIndex equipmentIndex, EquipmentDef equipDef)
@@ -170,7 +180,7 @@ namespace RoR2TierSelector
 
 			// Can't hot reload the item defs without something like reflection.
 			// TODO Load the changed tiers into the game???
-			ReloadItemTiers();
+			// ReloadItemTiers();
 
 			UnityEngine.Debug.Log($"{ConfigManager.items.ElementAt(index).Definition.Key} is now set to Tier {newTier} in the config, please restart your game for it to take effect.");
 		}

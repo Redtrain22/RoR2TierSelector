@@ -1,12 +1,10 @@
 using BepInEx.Configuration;
-using BepInEx.Logging;
 using R2API.Networking.Interfaces;
 using RoR2;
 using UnityEngine.Networking;
 using System.IO;
 using System.Xml.Serialization;
 using System.Collections.Generic;
-using System.Linq;
 namespace RoR2TierSelector
 {
 	public class SyncConfig : INetMessage
@@ -23,7 +21,24 @@ namespace RoR2TierSelector
 			this.items = items;
 			this.equipments = equipments;
 		}
+		public void Serialize(NetworkWriter writer)
+		{
+			// Create a MemoryStream to hold the serialized data
+			using (MemoryStream stream = new MemoryStream())
+			{
+				// Serialize the configuration data to XML and write it to the MemoryStream
+				XmlSerializer serializer = new XmlSerializer(typeof(List<ConfigEntry<int>>));
+				serializer.Serialize(stream, netId);
+				serializer.Serialize(stream, items);
+				serializer.Serialize(stream, equipments);
 
+				// Get the byte array representation of the serialized data
+				byte[] data = stream.ToArray();
+
+				// Write the byte array to the NetworkWriter
+				writer.WriteBytesAndSize(data, data.Length);
+			}
+		}
 		public void Deserialize(NetworkReader reader)
 		{
 			// Read the byte array from the NetworkReader
@@ -42,10 +57,8 @@ namespace RoR2TierSelector
 
 		public void OnReceived()
 		{
-			if (NetworkServer.active)
+			if (!NetworkServer.active)
 			{
-				RoR2TierSelector.tierLogger.Log("SyncConfig: Host ran this. Skip.");
-
 				return;
 			}
 			Chat.AddMessage($"Client received SyncConfig.");
@@ -53,28 +66,7 @@ namespace RoR2TierSelector
 			// Update the items and equipments lists in the ConfigManager with the received lists
 			ConfigManager.items = this.items;
 			ConfigManager.equipments = this.equipments;
-			// RoR2TierSelector.ReloadItemTiers();
-		}
-
-
-
-		public void Serialize(NetworkWriter writer)
-		{
-			// Create a MemoryStream to hold the serialized data
-			using (MemoryStream stream = new MemoryStream())
-			{
-				// Serialize the configuration data to XML and write it to the MemoryStream
-				XmlSerializer serializer = new XmlSerializer(typeof(List<ConfigEntry<int>>));
-				serializer.Serialize(stream, netId);
-				serializer.Serialize(stream, items);
-				serializer.Serialize(stream, equipments);
-
-				// Get the byte array representation of the serialized data
-				byte[] data = stream.ToArray();
-
-				// Write the byte array to the NetworkWriter
-				writer.WriteBytesAndSize(data, data.Length);
-			}
+			RoR2TierSelector.ReloadItemTiers();
 		}
 
 	}
